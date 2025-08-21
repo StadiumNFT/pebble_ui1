@@ -24,7 +24,7 @@ async function callProxy(path, body){
   }catch(e){ return null; }
 }
 
-function offlineHintFlow(q, step){
+function offlineHintFlow(step){
   if (step === 0) return "First, restate the problem in your own words. What is it asking?";
   if (step === 1) return "Underline the numbers and units you need. Which are important?";
   if (step === 2) return "Try a smaller, easy example of the same pattern.";
@@ -44,53 +44,36 @@ export function initHomework(){
 
   let step = 0;
 
-  btnHint.addEventListener('click', async () => {
+  btnHint?.addEventListener('click', async () => {
     const q = question.value.trim();
     if(!q){ addEntry("Type the homework question first 😊"); return; }
 
     const resp = await callProxy('/homework', {
-      question:q,
-      grade:grade.value,
-      explainLikeNine:explain9.checked,
-      hintFirst:hintFirst.checked,
-      step:0
+      question:q, grade:grade.value, explainLikeNine:explain9.checked, hintFirst:hintFirst.checked, step:0
     });
     if(resp && resp.hint){ addEntry(resp.hint); step = 1; return; }
-
-    addEntry( offlineHintFlow(q, 0) );
-    step = 1;
+    addEntry( offlineHintFlow(0) ); step = 1;
   });
 
-  btnNext.addEventListener('click', async () => {
+  btnNext?.addEventListener('click', async () => {
     const q = question.value.trim();
     if(!q){ addEntry("Type the homework question first 😊"); return; }
 
     const resp = await callProxy('/homework', {
-      question:q,
-      grade:grade.value,
-      explainLikeNine:explain9.checked,
-      hintFirst:hintFirst.checked,
-      step
+      question:q, grade:grade.value, explainLikeNine:explain9.checked, hintFirst:hintFirst.checked, step
     });
     if(resp && resp.next){ addEntry(resp.next); step += 1; return; }
-
-    addEntry( offlineHintFlow(q, step) );
-    step += 1;
+    addEntry( offlineHintFlow(step) ); step += 1;
   });
 
-  btnAns.addEventListener('click', async () => {
+  btnAns?.addEventListener('click', async () => {
     const q = question.value.trim();
     if(!q){ addEntry("Type the homework question first 😊"); return; }
 
     const resp = await callProxy('/homework', {
-      question:q,
-      grade:grade.value,
-      explainLikeNine:explain9.checked,
-      hintFirst:hintFirst.checked,
-      reveal:true
+      question:q, grade:grade.value, explainLikeNine:explain9.checked, hintFirst:hintFirst.checked, reveal:true
     });
     if(resp && resp.answer){ addEntry("Answer: " + resp.answer); return; }
-
     addEntry("Answer: Let's do the last step together—use your equation from the previous hint to compute the final value.");
   });
 }

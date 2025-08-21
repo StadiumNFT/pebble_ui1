@@ -13,8 +13,6 @@
     <header class="app-header">
       <h1>👋 Hi! I'm <span class="pebble-name">Pebble</span></h1>
       <p class="subtitle">Your friendly homework buddy — tap a big button below.</p>
-
-      <!-- TABS -->
       <nav class="tabs">
         <button class="tab-btn active" data-tab="tab3d">3D</button>
         <button class="tab-btn" data-tab="tabHomework">Homework</button>
@@ -22,7 +20,6 @@
     </header>
 
     <main class="app-main">
-      <!-- 3D TAB -->
       <section class="viewer-card tab-panel" id="tab3d">
         <div id="dropzone" class="dropzone" aria-label="Drop your .glb here">
           <div id="viewer"></div>
@@ -38,7 +35,6 @@
         </div>
       </section>
 
-      <!-- HOMEWORK TAB -->
       <section class="homework-card tab-panel hidden" id="tabHomework">
         <div class="hw-grid">
           <div class="hw-controls">
@@ -49,18 +45,15 @@
               <option value="6-8">6–8</option>
               <option value="9-12">9–12</option>
             </select>
-
             <label class="toggle">
               <input type="checkbox" id="hwExplainLike9" checked />
               <span>Explain like I’m 9</span>
             </label>
-
             <label class="toggle">
               <input type="checkbox" id="hwHintFirst" checked />
               <span>Hint first (no spoilers)</span>
             </label>
           </div>
-
           <div class="hw-inputs">
             <textarea id="hwQuestion" class="chat-input" placeholder="Type the homework question here..."></textarea>
             <div class="hw-buttons">
@@ -69,7 +62,6 @@
               <button id="hwAnswerBtn" class="btn success">Reveal Answer</button>
             </div>
           </div>
-
           <div class="hw-log" id="hwLog" aria-live="polite"></div>
         </div>
       </section>
@@ -86,66 +78,44 @@
   </div>
 
   <script type="module">
-    /* External libs via ESM to avoid bare import issues on GitHub Pages */
     import * as THREE from "https://esm.sh/three@0.162.0";
     import { OrbitControls } from "https://esm.sh/three@0.162.0/examples/jsm/controls/OrbitControls.js";
     import { GLTFLoader } from "https://esm.sh/three@0.162.0/examples/jsm/loaders/GLTFLoader.js";
 
-    /* Local modules */
-    import { initUI } from './js/ui.js';
     import { initViewer, loadGLBFromFile, sayLine } from './js/viewer.js';
-    import { initChat } from './js/chat.js';
     import { getProxyURL, setProxyURL } from './js/store.js';
-    import { initHomework } from './js/homework.js';
+    import { initHomework } from './js/homework.js";
 
-    /* Tabs */
+    // Optional chat stub
+    let initChat = () => {};
+    try { ({ initChat } = await import('./js/chat.js')); } catch {}
+
+    // Tabs
     const tabBtns = Array.from(document.querySelectorAll('.tab-btn'));
     const panels = Array.from(document.querySelectorAll('.tab-panel'));
-    tabBtns.forEach(btn => btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const id = btn.getAttribute('data-tab');
+    function showTab(id){
+      tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === id));
       panels.forEach(p => p.classList.toggle('hidden', p.id !== id));
-    }));
+    }
+    tabBtns.forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
 
-    /* 3D viewer */
+    // 3D viewer
     await initViewer({ THREE, OrbitControls, GLTFLoader });
 
-    /* Hook UI buttons */
-    initUI({
-      onLoadGLBClick: () => document.getElementById('fileGLB').click(),
+    // Button wiring
+    const byId = (id) => document.getElementById(id);
+    byId('btnLoadGLB')?.addEventListener('click', () => byId('fileGLB')?.click());
+    byId('btnTalk')?.addEventListener('click', () => sayLine("Hi! I'm Pebble. I love solving homework in fun ways!"));
+    byId('btnCalm')?.addEventListener('click', () => sayLine("Deep breath... and relax. Ready when you are."));
+    byId('btnGarden')?.addEventListener('click', () => sayLine("Welcome to the Pebble Garden — collect stars and grow!"));
+    byId('btnHomework')?.addEventListener('click', () => { showTab('tabHomework'); sayLine("Okay! Type your question, then tap Get Hint."); });
 
-      onTalkClick: () => sayLine("Hi! I'm Pebble. I love solving homework in fun ways!"),
-      onCalmClick: () => sayLine("Deep breath... and relax. Ready when you are."),
-      onGardenClick: () => sayLine("Welcome to the Pebble Garden — collect stars and grow!"),
-
-      /* IMPORTANT: switch to Homework tab */
-      onHomeworkClick: () => {
-        // highlight Homework tab
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        const hwTabBtn = document.querySelector('.tab-btn[data-tab="tabHomework"]');
-        if (hwTabBtn) hwTabBtn.classList.add('active');
-
-        // show Homework panel
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-        const hwPanel = document.getElementById('tabHomework');
-        if (hwPanel) {
-          hwPanel.classList.remove('hidden');
-          hwPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // gentle nudge (ok to remove)
-        sayLine("Okay! Type your question, then tap Get Hint.");
-      },
-    });
-
-    /* GLB file choose + drag/drop */
-    document.getElementById('fileGLB').addEventListener('change', async (e) => {
+    // GLB choose + drag/drop
+    byId('fileGLB')?.addEventListener('change', async (e) => {
       const file = e.target.files?.[0];
-      if (file) { document.getElementById('drop-hint').style.display='none'; await loadGLBFromFile(file); }
+      if (file) { byId('drop-hint').style.display='none'; await loadGLBFromFile(file); }
     });
-    const dropzone = document.getElementById('dropzone');
-    const dropHint = document.getElementById('drop-hint');
+    const dropzone = byId('dropzone'); const dropHint = byId('drop-hint');
     ['dragenter','dragover'].forEach(evt => dropzone.addEventListener(evt, (e) => {
       e.preventDefault(); e.stopPropagation(); dropzone.classList.add('drag');
     }));
@@ -157,17 +127,17 @@
       if (file) { dropHint.style.display = 'none'; await loadGLBFromFile(file); }
     });
 
-    /* Proxy URL memory */
-    const proxyInput = document.getElementById('proxyUrl');
+    // Proxy memory
+    const proxyInput = byId('proxyUrl');
     proxyInput.value = getProxyURL() || '';
-    document.getElementById('btnSaveProxy').addEventListener('click', () => {
+    byId('btnSaveProxy')?.addEventListener('click', () => {
       setProxyURL(proxyInput.value.trim());
       alert('Saved proxy URL.');
     });
 
-    /* Homework + Chat boot */
     initHomework();
     initChat({ sayLine });
+    console.log('Pebble UI booted 🌟');
   </script>
 </body>
 </html>

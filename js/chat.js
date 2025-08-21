@@ -1,1 +1,2 @@
-export function initChat(){console.log('chat ready');}
+// Optional stub so imports never fail.
+export function initChat(){ /* no-op */ }
