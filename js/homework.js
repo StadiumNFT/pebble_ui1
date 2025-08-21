@@ -48,7 +48,6 @@ export function initHomework(){
     const q = question.value.trim();
     if(!q){ addEntry("Type the homework question first 😊"); return; }
 
-    // Try your proxy first (matches what you used yesterday)
     const resp = await callProxy('/homework', {
       question:q,
       grade:grade.value,
@@ -58,7 +57,6 @@ export function initHomework(){
     });
     if(resp && resp.hint){ addEntry(resp.hint); step = 1; return; }
 
-    // Offline fallback (no proxy)
     addEntry( offlineHintFlow(q, 0) );
     step = 1;
   });
