@@ -1,4 +1,3 @@
-
 import { ttsSpeak } from './tts.js';
 let THREE, OrbitControls, GLTFLoader;
 let scene,camera,renderer,controls,clock;

@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,7 +6,6 @@
   <title>Pebble — Kid-Friendly WOW Demo</title>
   <link rel="icon" href="favicon.ico" />
   <link rel="stylesheet" href="css/styles.css" />
-  <meta name="description" content="Pebble — a friendly kid UI with a 3D GLB viewer and voice." />
 </head>
 <body>
   <div id="app">
@@ -15,6 +13,7 @@
       <h1>👋 Hi! I'm <span class="pebble-name">Pebble</span></h1>
       <p class="subtitle">Your friendly homework buddy — tap a big button below.</p>
     </header>
+
     <main class="app-main">
       <section class="viewer-card">
         <div id="dropzone" class="dropzone" aria-label="Drop your .glb here">
@@ -30,6 +29,7 @@
           <button id="btnHomework" class="btn homework">Homework Buddy</button>
         </div>
       </section>
+
       <section class="chat-card">
         <div class="chat-log" id="chatLog" aria-live="polite"></div>
         <div class="chat-controls">
@@ -39,6 +39,7 @@
         <div class="small-note">Auto-talk is ON: Pebble will speak every reply.</div>
       </section>
     </main>
+
     <footer class="app-footer">
       <div class="footer-row">
         <label class="label">Proxy URL:</label>
@@ -48,10 +49,11 @@
       <div class="tiny-note">We never store keys in the front-end. Proxy keeps secrets safe.</div>
     </footer>
   </div>
+
   <script type="module">
     import * as THREE from "https://unpkg.com/three@0.162.0/build/three.module.js?v=wow";
-import { OrbitControls } from "https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js?v=wow";
-import { GLTFLoader } from "https://unpkg.com/three@0.162.0/examples/jsm/loaders/GLTFLoader.js?v=wow";
+    import { OrbitControls } from "https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js?v=wow";
+    import { GLTFLoader } from "https://unpkg.com/three@0.162.0/examples/jsm/loaders/GLTFLoader.js?v=wow";
 
     import { initUI } from './js/ui.js';
     import { initViewer, loadGLBFromFile, sayLine } from './js/viewer.js';
@@ -59,6 +61,7 @@ import { GLTFLoader } from "https://unpkg.com/three@0.162.0/examples/jsm/loaders
     import { getProxyURL, setProxyURL } from './js/store.js';
 
     await initViewer({ THREE, OrbitControls, GLTFLoader });
+
     initUI({
       onLoadGLBClick: () => document.getElementById('fileGLB').click(),
       onTalkClick: () => sayLine("Hi! I'm Pebble. I love solving homework in fun ways!"),

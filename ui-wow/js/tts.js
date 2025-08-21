@@ -1,1 +1,1 @@
-export async function ttsSpeak(text){if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(text);u.rate=1.0;u.pitch=1.2;u.volume=1.0;return new Promise((r)=>{u.onend=r;window.speechSynthesis.cancel();window.speechSynthesis.speak(u);});}else{console.log('Speech Synthesis not available.');}}
+export async function ttsSpeak(text){if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(text);u.rate=1.0;u.pitch=1.2;u.volume=1.0;return new Promise((r)=>{u.onend=r;window.speechSynthesis.cancel();window.speechSynthesis.speak(u);});}}
