@@ -6,8 +6,8 @@ let pebble, idlePhase = 0, isTalking = false;
 
 export async function initViewer(mods) {
   // bring in modules from index.html
-  THREE = mods.THREE; 
-  OrbitControls = mods.OrbitControls; 
+  THREE = mods.THREE;
+  OrbitControls = mods.OrbitControls;
   GLTFLoader = mods.GLTFLoader;
 
   clock = new THREE.Clock();
@@ -25,17 +25,14 @@ export async function initViewer(mods) {
 
   // transparent renderer + attach to page
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setClearColor(0x000000, 0);   // 0 alpha = fully transparent
+  renderer.setClearColor(0x000000, 0);  // 0 alpha = fully transparent
   renderer.setPixelRatio(window.devicePixelRatio || 1);
   renderer.setSize(w, h);
   container.appendChild(renderer.domElement);
 
-  // nice orbiting controls
+  // orbit controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  // optional: slow auto-rotate
-  // controls.autoRotate = true;
-  // controls.autoRotateSpeed = 0.5;
 
   // lights
   const hemi = new THREE.HemisphereLight(0xffffff, 0x88aadd, 0.8);
@@ -45,8 +42,6 @@ export async function initViewer(mods) {
   dir.position.set(3, 5, 2);
   dir.castShadow = true;
   scene.add(dir);
-
-  // (intentionally no ground plane — keeps the canvas fully transparent)
 
   animate();
   window.addEventListener('resize', onResize);
@@ -78,8 +73,11 @@ async function loadGLB(url) {
         pebble.traverse((o) => {
           if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
         });
-        pebble.position.set(0, 0, 0);
         scene.add(pebble);
+
+        // center + scale + nice camera distance
+        fitToView(pebble, { offset: 1.35 });
+
         resolve();
       },
       undefined,
@@ -88,16 +86,46 @@ async function loadGLB(url) {
   });
 }
 
+// center object at origin, scale to a comfy size, and set camera/controls
+function fitToView(object, { offset = 1.25 } = {}) {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  // move model so its center is at (0,0,0)
+  object.position.sub(center);
+
+  // distance so model fits vertically in view (with a bit of offset)
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const fov = THREE.MathUtils.degToRad(camera.fov);
+  const distance = (maxDim / 2) / Math.tan(fov / 2) * offset;
+
+  // place camera on a nice diagonal
+  const dir = new THREE.Vector3(1, 0.5, 1).normalize();
+  camera.position.copy(dir.multiplyScalar(distance));
+  camera.near = distance / 100;
+  camera.far  = distance * 100;
+  camera.updateProjectionMatrix();
+
+  // focus & limits
+  controls.target.set(0, 0, 0);
+  controls.maxDistance = distance * 4;
+  controls.minDistance = distance / 10;
+  controls.update();
+}
+
 function animate() {
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
   controls.update();
 
   if (pebble) {
+    // gentle idle bounce
     idlePhase += dt;
     const bounce = Math.sin(idlePhase * 2) * 0.02;
     pebble.position.y = 0.02 + bounce;
 
+    // subtle talk wiggle
     if (isTalking) {
       const s = 1.0 + Math.sin(idlePhase * 20) * 0.03;
       pebble.scale.set(s, 1.0, s);
