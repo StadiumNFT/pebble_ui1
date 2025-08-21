@@ -13,3 +13,7 @@
 .chat-controls{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:10px}.chat-input{padding:12px 14px;border-radius:12px;border:2px solid #c7d2fe;font-size:16px}
 .app-footer{margin:16px auto 24px;max-width:1200px;padding:0 12px;color:var(--muted)}.footer-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.label{font-weight:700}.proxy-input{padding:10px 12px;border-radius:10px;border:2px solid #e5e7eb;min-width:320px}
 .tiny-note,.small-note{color:#7c8aa1;font-size:12px;margin-top:8px}
+/* Transparent viewer — no borders/shadows */
+.viewer-card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.dropzone     { background: transparent; border: 0; box-shadow: none; }
+.dropzone.drag{ box-shadow: none; border: 0; }
