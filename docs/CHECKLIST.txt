@@ -1,0 +1,8 @@
+
+Checklist
+- UI repo has index.html at root (not inside a subfolder)
+- css/styles.css and js/*.js uploaded
+- .nojekyll present
+- Pages enabled (main / root)
+- Proxy deployed with OPENAI_API_KEY set
+- Proxy URL saved in UI footer

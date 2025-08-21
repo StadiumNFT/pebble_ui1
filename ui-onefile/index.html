@@ -1,0 +1,31 @@
+
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Pebble — One-File Fallback</title>
+<style>:root{--bg:#f7fbff;--card:#fff;--text:#0b2545;--muted:#6c7a89}body{margin:0;background:var(--bg);font-family:system-ui,Segoe UI,Arial}.wrap{max-width:1000px;margin:0 auto;padding:16px}
+.card{background:var(--card);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:12px}.grid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+#viewer{height:420px;border:3px dashed #d1e3ff;border-radius:14px;background:linear-gradient(#eef6ff,#fff)}.btn{padding:12px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.chat{height:280px;background:#f3f6fb;border-radius:12px;padding:8px;overflow:auto}</style></head>
+<body><div class="wrap"><h1>👋 Hi! I'm Pebble</h1><div class="grid"><div class="card"><div id="viewer"></div><div class="row">
+<button id="btnLoad" class="btn">Load Pebble GLB</button><button id="btnTalk" class="btn">Talk</button><button id="btnCalm" class="btn">Calm</button></div>
+<input type="file" id="fileGLB" accept=".glb,.gltf" style="display:none" /></div><div class="card"><div class="chat" id="log"></div>
+<div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px"><input id="inp" placeholder="Ask Pebble anything..." /><button id="send" class="btn">Send</button></div></div></div></div>
+<script type="module">
+import * as THREE from "https://unpkg.com/three@0.162.0/build/three.module.js?v=one";
+import { OrbitControls } from "https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js?v=one";
+import { GLTFLoader } from "https://unpkg.com/three@0.162.0/examples/jsm/loaders/GLTFLoader.js?v=one";
+let scene,camera,renderer,controls,clock,pebble,talking=false,t=0;
+function init(){const c=document.getElementById('viewer');scene=new THREE.Scene();scene.background=new THREE.Color(0xf5f9ff);
+const w=c.clientWidth||600,h=c.clientHeight||400;camera=new THREE.PerspectiveCamera(45,w/h,0.1,100);camera.position.set(0.8,1.2,2.2);
+renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(w,h);c.appendChild(renderer.domElement);
+controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;scene.add(new THREE.HemisphereLight(0xffffff,0x88aadd,0.9));
+const d=new THREE.DirectionalLight(0xffffff,0.9);d.position.set(3,5,2);scene.add(d);clock=new THREE.Clock();animate();
+window.addEventListener('resize',()=>{const w2=c.clientWidth||600,h2=c.clientHeight||400;camera.aspect=w2/h2;camera.updateProjectionMatrix();renderer.setSize(w2,h2);});}
+function animate(){requestAnimationFrame(animate);const dt=clock.getDelta();t+=dt;controls.update();if(pebble){pebble.position.y=0.02+Math.sin(t*2)*0.02;if(talking){const s=1+Math.sin(t*20)*0.03;pebble.scale.set(s,1,s);}else{pebble.scale.set(1,1,1);}}renderer.render(scene,camera);}
+async function loadGLBFile(file){const url=URL.createObjectURL(file);const loader=new GLTFLoader();loader.load(url,(gltf)=>{if(pebble)scene.remove(pebble);pebble=gltf.scene;scene.add(pebble);URL.revokeObjectURL(url);});}
+function speak(text){if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(text);u.pitch=1.2;u.rate=1.0;talking=true;u.onend=()=>talking=false;speechSynthesis.cancel();speechSynthesis.speak(u);}log(text,'bot');}
+function log(text,who='user'){const el=document.createElement('div');el.textContent=(who==='user'?'You: ':'Pebble: ')+text;const l=document.getElementById('log');l.appendChild(el);l.scrollTop=l.scrollHeight;}
+init();document.getElementById('btnLoad').onclick=()=>document.getElementById('fileGLB').click();
+document.getElementById('fileGLB').onchange=(e)=>{const f=e.target.files?.[0];if(f)loadGLBFile(f);};
+document.getElementById('btnTalk').onclick=()=>speak("Hi! I'm Pebble. I help make homework fun.");
+document.getElementById('btnCalm').onclick=()=>speak("Deep breath... feeling calm and ready.");
+document.getElementById('send').onclick=()=>{const v=document.getElementById('inp').value.trim();if(!v)return;log(v,'user');document.getElementById('inp').value='';speak("I hear you! Let's solve it together.");};
+</script></body></html>

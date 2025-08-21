@@ -1,0 +1,7 @@
+
+FAQ
+Q: Why no `three` folder in my repo?
+A: We use CDN imports. No local build needed.
+
+Q: I still see 'module specifier "three"' errors.
+A: Browser is serving an old cached file. Add ?v=something to the site URL, add .nojekyll, and hard refresh.

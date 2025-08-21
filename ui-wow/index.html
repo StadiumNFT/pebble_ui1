@@ -1,0 +1,98 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pebble — Kid-Friendly WOW Demo</title>
+  <link rel="icon" href="favicon.ico" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <meta name="description" content="Pebble — a friendly kid UI with a 3D GLB viewer and voice." />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>👋 Hi! I'm <span class="pebble-name">Pebble</span></h1>
+      <p class="subtitle">Your friendly homework buddy — tap a big button below.</p>
+    </header>
+    <main class="app-main">
+      <section class="viewer-card">
+        <div id="dropzone" class="dropzone" aria-label="Drop your .glb here">
+          <div id="viewer"></div>
+          <div class="drop-hint" id="drop-hint">Drop a .glb here or use “Load Pebble GLB”.</div>
+        </div>
+        <div class="viewer-actions">
+          <button id="btnLoadGLB" class="btn primary">Load Pebble GLB</button>
+          <input type="file" id="fileGLB" accept=".glb,.gltf" style="display:none" />
+          <button id="btnTalk" class="btn success">Talk</button>
+          <button id="btnCalm" class="btn calm">Calm</button>
+          <button id="btnGarden" class="btn garden">Garden</button>
+          <button id="btnHomework" class="btn homework">Homework Buddy</button>
+        </div>
+      </section>
+      <section class="chat-card">
+        <div class="chat-log" id="chatLog" aria-live="polite"></div>
+        <div class="chat-controls">
+          <input id="chatInput" class="chat-input" placeholder="Ask Pebble anything..." />
+          <button id="btnSend" class="btn primary">Send</button>
+        </div>
+        <div class="small-note">Auto-talk is ON: Pebble will speak every reply.</div>
+      </section>
+    </main>
+    <footer class="app-footer">
+      <div class="footer-row">
+        <label class="label">Proxy URL:</label>
+        <input id="proxyUrl" class="proxy-input" placeholder="https://your-proxy.example.com" />
+        <button id="btnSaveProxy" class="btn">Save</button>
+      </div>
+      <div class="tiny-note">We never store keys in the front-end. Proxy keeps secrets safe.</div>
+    </footer>
+  </div>
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.162.0/build/three.module.js?v=wow';
+    import { OrbitControls } from 'https://unpkg.com/three@0.162.0/examples/jsm/controls/OrbitControls.js?v=wow';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.162.0/examples/jsm/loaders/GLTFLoader.js?v=wow';
+
+    import { initUI } from './js/ui.js';
+    import { initViewer, loadGLBFromFile, sayLine } from './js/viewer.js';
+    import { initChat } from './js/chat.js';
+    import { getProxyURL, setProxyURL } from './js/store.js';
+
+    await initViewer({ THREE, OrbitControls, GLTFLoader });
+    initUI({
+      onLoadGLBClick: () => document.getElementById('fileGLB').click(),
+      onTalkClick: () => sayLine("Hi! I'm Pebble. I love solving homework in fun ways!"),
+      onCalmClick: () => sayLine("Deep breath... and relax. Ready when you are."),
+      onGardenClick: () => sayLine("Welcome to the Pebble Garden — collect stars and grow!"),
+      onHomeworkClick: () => sayLine("Snap homework, I make questions and hints, you win rewards!"),
+    });
+
+    document.getElementById('fileGLB').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (file) { document.getElementById('drop-hint').style.display='none'; await loadGLBFromFile(file); }
+    });
+
+    const dropzone = document.getElementById('dropzone');
+    const dropHint = document.getElementById('drop-hint');
+    ['dragenter','dragover'].forEach(evt => dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation(); dropzone.classList.add('drag');
+    }));
+    ['dragleave','drop'].forEach(evt => dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('drag');
+    }));
+    dropzone.addEventListener('drop', async (e) => {
+      const file = e.dataTransfer?.files?.[0];
+      if (file) { dropHint.style.display = 'none'; await loadGLBFromFile(file); }
+    });
+
+    const proxyInput = document.getElementById('proxyUrl');
+    proxyInput.value = getProxyURL() || '';
+    document.getElementById('btnSaveProxy').addEventListener('click', () => {
+      setProxyURL(proxyInput.value.trim());
+      alert('Saved proxy URL.');
+    });
+
+    initChat({ sayLine });
+  </script>
+</body>
+</html>

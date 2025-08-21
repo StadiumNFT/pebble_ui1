@@ -1,0 +1,7 @@
+
+Pebble Demo — Grandpa Steps
+1) Make two repos: `ui-wow` for the website (Public), `pebble-proxy` for the backend (Private OK).
+2) UI: Upload the contents of ui-wow/ (index.html, css/, js/, .nojekyll, favicon.ico) to the repo root. Enable GitHub Pages (Settings → Pages → Branch=main, Folder=/ (root)).
+3) Visit the site. Drag your .glb onto the big box or click “Load Pebble GLB”.
+4) Proxy: Deploy the proxy/ folder to Render (Web Service). Add env OPENAI_API_KEY. Start command: npm start.
+5) On the website footer, paste the proxy URL and Save.
