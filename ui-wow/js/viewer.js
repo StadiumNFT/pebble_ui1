@@ -5,14 +5,13 @@ let scene, camera, renderer, controls, clock;
 let pebble, idlePhase = 0, isTalking = false;
 
 export async function initViewer(mods) {
-  // bring in modules from index.html
   THREE = mods.THREE;
   OrbitControls = mods.OrbitControls;
   GLTFLoader = mods.GLTFLoader;
 
   clock = new THREE.Clock();
 
-  // transparent scene (no background color)
+  // transparent scene
   scene = new THREE.Scene();
   scene.background = null;
 
@@ -23,18 +22,15 @@ export async function initViewer(mods) {
   camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
   camera.position.set(0.8, 1.2, 2.2);
 
-  // transparent renderer + attach to page
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setClearColor(0x000000, 0);  // 0 alpha = fully transparent
+  renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(window.devicePixelRatio || 1);
   renderer.setSize(w, h);
   container.appendChild(renderer.domElement);
 
-  // orbit controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-  // lights
   const hemi = new THREE.HemisphereLight(0xffffff, 0x88aadd, 0.8);
   scene.add(hemi);
 
@@ -75,9 +71,8 @@ async function loadGLB(url) {
         });
         scene.add(pebble);
 
-        // center + scale + nice camera distance
+        // center + scale + set camera comfortably
         fitToView(pebble, { offset: 1.35 });
-
         resolve();
       },
       undefined,
@@ -86,7 +81,7 @@ async function loadGLB(url) {
   });
 }
 
-// center object at origin, scale to a comfy size, and set camera/controls
+/* Center object at origin, scale to comfy size, and set camera/controls */
 function fitToView(object, { offset = 1.25 } = {}) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
@@ -95,7 +90,7 @@ function fitToView(object, { offset = 1.25 } = {}) {
   // move model so its center is at (0,0,0)
   object.position.sub(center);
 
-  // distance so model fits vertically in view (with a bit of offset)
+  // distance for full view (with a little breathing room)
   const maxDim = Math.max(size.x, size.y, size.z);
   const fov = THREE.MathUtils.degToRad(camera.fov);
   const distance = (maxDim / 2) / Math.tan(fov / 2) * offset;
@@ -107,7 +102,7 @@ function fitToView(object, { offset = 1.25 } = {}) {
   camera.far  = distance * 100;
   camera.updateProjectionMatrix();
 
-  // focus & limits
+  // orbit focus & limits
   controls.target.set(0, 0, 0);
   controls.maxDistance = distance * 4;
   controls.minDistance = distance / 10;
