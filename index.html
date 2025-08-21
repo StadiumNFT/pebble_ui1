@@ -3,20 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pebble — Kid-Friendly WOW Demo (ESM fix)</title>
+  <title>Pebble — WOW + Homework MVP</title>
   <link rel="icon" href="favicon.ico" />
   <link rel="stylesheet" href="css/styles.css" />
-  <meta name="description" content="Pebble — a friendly kid UI with a 3D GLB viewer and voice." />
+  <meta name="description" content="Pebble — kid-friendly 3D viewer with Homework Mode." />
 </head>
 <body>
   <div id="app">
     <header class="app-header">
       <h1>👋 Hi! I'm <span class="pebble-name">Pebble</span></h1>
       <p class="subtitle">Your friendly homework buddy — tap a big button below.</p>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="tab3d">3D</button>
+        <button class="tab-btn" data-tab="tabHomework">Homework</button>
+      </nav>
     </header>
 
     <main class="app-main">
-      <section class="viewer-card">
+      <section class="viewer-card tab-panel" id="tab3d">
         <div id="dropzone" class="dropzone" aria-label="Drop your .glb here">
           <div id="viewer"></div>
           <div class="drop-hint" id="drop-hint">Drop a .glb here or use “Load Pebble GLB”.</div>
@@ -31,13 +36,39 @@
         </div>
       </section>
 
-      <section class="chat-card">
-        <div class="chat-log" id="chatLog" aria-live="polite"></div>
-        <div class="chat-controls">
-          <input id="chatInput" class="chat-input" placeholder="Ask Pebble anything..." />
-          <button id="btnSend" class="btn primary">Send</button>
+      <section class="homework-card tab-panel hidden" id="tabHomework">
+        <div class="hw-grid">
+          <div class="hw-controls">
+            <label class="label">Grade Level</label>
+            <select id="hwGrade">
+              <option value="k-2">K–2</option>
+              <option value="3-5" selected>3–5</option>
+              <option value="6-8">6–8</option>
+              <option value="9-12">9–12</option>
+            </select>
+
+            <label class="toggle">
+              <input type="checkbox" id="hwExplainLike9" checked />
+              <span>Explain like I’m 9</span>
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" id="hwHintFirst" checked />
+              <span>Hint first (no spoilers)</span>
+            </label>
+          </div>
+
+          <div class="hw-inputs">
+            <textarea id="hwQuestion" class="chat-input" placeholder="Type the homework question here..."></textarea>
+            <div class="hw-buttons">
+              <button id="hwHintBtn" class="btn primary">Get Hint</button>
+              <button id="hwNextBtn" class="btn garden">Show Next Step</button>
+              <button id="hwAnswerBtn" class="btn success">Reveal Answer</button>
+            </div>
+          </div>
+
+          <div class="hw-log" id="hwLog" aria-live="polite"></div>
         </div>
-        <div class="small-note">Auto-talk is ON: Pebble will speak every reply.</div>
       </section>
     </main>
 
@@ -47,7 +78,7 @@
         <input id="proxyUrl" class="proxy-input" placeholder="https://your-proxy.example.com" />
         <button id="btnSaveProxy" class="btn">Save</button>
       </div>
-      <div class="tiny-note">We never store keys in the front-end. Proxy keeps secrets safe.</div>
+      <div class="tiny-note">Keys never live in the front-end. Proxy keeps secrets safe.</div>
     </footer>
   </div>
 
@@ -60,6 +91,16 @@
     import { initViewer, loadGLBFromFile, sayLine } from './js/viewer.js';
     import { initChat } from './js/chat.js';
     import { getProxyURL, setProxyURL } from './js/store.js';
+    import { initHomework } from './js/homework.js';
+
+    const tabBtns = Array.from(document.querySelectorAll('.tab-btn'));
+    const panels = Array.from(document.querySelectorAll('.tab-panel'));
+    tabBtns.forEach(btn => btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const id = btn.getAttribute('data-tab');
+      panels.forEach(p => p.classList.toggle('hidden', p.id !== id));
+    }));
 
     await initViewer({ THREE, OrbitControls, GLTFLoader });
 
@@ -75,7 +116,6 @@
       const file = e.target.files?.[0];
       if (file) { document.getElementById('drop-hint').style.display='none'; await loadGLBFromFile(file); }
     });
-
     const dropzone = document.getElementById('dropzone');
     const dropHint = document.getElementById('drop-hint');
     ['dragenter','dragover'].forEach(evt => dropzone.addEventListener(evt, (e) => {
@@ -96,6 +136,7 @@
       alert('Saved proxy URL.');
     });
 
+    initHomework();
     initChat({ sayLine });
   </script>
 </body>
